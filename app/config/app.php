@@ -77,7 +77,7 @@ return array(
 	|
 	*/
 
-	'key' => 'qmt2Dv8gK1wtUcnSP9LABIwzYoeFJ1NB',
+	'key' => 'ZnDJrQDKCpBQXOyYAQLkrz00pCYmCRWm',
 
 	/*
 	|--------------------------------------------------------------------------
@@ -129,6 +129,7 @@ return array(
 		'Way\Generators\GeneratorsServiceProvider',
 		'Juy\Profiler\Providers\ProfilerServiceProvider',
 		'Intervention\Image\ImageServiceProvider',
+		'anlutro\cURL\Laravel\cURLServiceProvider',
 		'McCool\LaravelAutoPresenter\LaravelAutoPresenterServiceProvider',
 		'Syntax\Core\CoreServiceProvider',
 		'Syntax\Core\View\ViewServiceProvider',
@@ -199,6 +200,7 @@ return array(
 		'Str'                         => 'Illuminate\Support\Str',
 		'URL'                         => 'Illuminate\Support\Facades\URL',
 		'Image'                       => 'Intervention\Image\Facades\Image',
+		'cURL'                        => 'anlutro\cURL\Laravel\cURL'
 	),
 
 );

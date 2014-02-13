@@ -23,7 +23,7 @@ class Forum_reply_typesTableSeeder extends Seeder {
         	array(
 	        	'name' => 'Inner Thought',
 	        	'keyName' => 'inner-thought',
-	        	'description' => 'A post or reply that contains a character\'s internal dialog.',
+	        	'description' => 'A post or reply that contains internal dialog.',
 	        	'created_at' => date('Y-m-d H:i:s')
 	        ),
         	array(

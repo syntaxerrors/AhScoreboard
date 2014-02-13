@@ -16,7 +16,6 @@ class CreateChatRoomsTable extends Migration {
             $table->string('uniqueId', 10);
             $table->primary('uniqueId');
             $table->string('user_id', 10)->index();
-            $table->string('game_id', 10)->index()->nullable();
             $table->text('name');
             $table->boolean('activeFlag')->default(1);
             $table->timestamps();

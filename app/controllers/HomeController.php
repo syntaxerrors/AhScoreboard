@@ -15,4 +15,11 @@ class HomeController extends Core_HomeController {
         $this->setViewData('newsItems', $newsItems);
         $this->setViewData('developer', $developer);
     }
+
+    public function getYoutube($id, $timestamp, $end)
+    {
+        $this->setViewData('id', $id);
+        $this->setViewData('timestamp', $timestamp);
+        $this->setViewData('end', $end);
+    }
 }

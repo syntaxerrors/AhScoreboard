@@ -24,6 +24,22 @@ class PreferencesTableSeeder extends Seeder {
 				'display'     => 'select',
 				'description' => 'This will allow other users to see your email address.',
 			),
+			array(
+				'name'        => 'Alert location',
+				'keyName'     => 'ALERT_LOCATION',
+				'value'       => 'top-left|top|top-right|bottom-right|bottom|bottom-left',
+				'default'     => 'top',
+				'display'     => 'select',
+				'description' => 'Select where you would like the alert box to appear.',
+			),
+			array(
+				'name'        => 'Popover interaction',
+				'keyName'     => 'POPOVER_TYPE',
+				'value'       => 'click|hover|focus',
+				'default'     => 'click',
+				'display'     => 'select',
+				'description' => 'How you would like to interact with popover text.',
+			),
 		);
 
 		// Uncomment the below to run the seeder

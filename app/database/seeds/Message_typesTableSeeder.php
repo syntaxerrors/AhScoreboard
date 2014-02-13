@@ -24,10 +24,6 @@ class Message_typesTableSeeder extends Seeder {
 				'name'       => 'Action Approved',
 				'keyName'    => 'action-approved',
 			),
-			array(
-				'name'       => 'Character Approved',
-				'keyName'    => 'character-approved',
-			),
 		);
 
 		// Uncomment the below to run the seeder

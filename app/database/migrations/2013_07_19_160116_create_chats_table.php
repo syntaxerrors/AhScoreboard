@@ -16,7 +16,6 @@ class CreateChatsTable extends Migration {
             $table->increments('id');
             $table->string('chat_room_id', 10)->index();
             $table->string('user_id', 10)->index();
-            $table->string('character_id', 10)->index()->nullable();
             $table->text('message');
             $table->timestamps();
         });

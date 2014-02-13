@@ -23,7 +23,7 @@ class Forum_board_typesTableSeeder extends Seeder {
         	array(
 	        	'name' => 'Application',
 	        	'keyName' => 'application',
-	        	'description' => 'The location all game applications will go.',
+	        	'description' => 'The location all applications will go.',
 	        	'created_at' => date('Y-m-d H:i:s')
 	        ),
         );

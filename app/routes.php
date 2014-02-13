@@ -8,7 +8,9 @@ Route::get('logout', function()
 });
 
 // Non-Secure routes
-Route::controller('api' , 'Core_ApiVersionOneController');
+Route::controller('api' ,	'Core_ApiVersionOneController');
+Route::controller('video',	'VideoController');
+Route::controller('quotes',	'QuoteController');
 
 // Secure routes
 /********************************************************************
@@ -16,10 +18,18 @@ Route::controller('api' , 'Core_ApiVersionOneController');
  *******************************************************************/
 Route::group(array('before' => 'auth'), function()
 {
-	Route::controller('user'	, 'Core_UserController');
+	Route::controller('user'	, 'UserController');
 	Route::controller('messages', 'Core_MessageController');
 	Route::controller('chat'	, 'Core_ChatController');
 	Route::controller('github'	, 'Core_GithubController');
+});
+
+/********************************************************************
+ * Access to contributor areas
+ *******************************************************************/
+Route::group(array('before' => 'auth|permissions:CONTRIBUTOR'), function()
+{
+	Route::controller('manage',			'ManageController');
 });
 
 /********************************************************************
@@ -54,7 +64,7 @@ Route::group(array('before' => 'auth|permission:FORUM_ACCESS'), function()
  *******************************************************************/
 Route::group(array('before' => 'auth|permission:SITE_ADMIN'), function()
 {
-	Route::controller('admin', 'Core_AdminController');
+	Route::controller('admin', 'AdminController');
 });
 
 // Landing page

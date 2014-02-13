@@ -29,12 +29,6 @@ class MenuController extends Core_BaseController
 				}
 			}
 
-			// User Menu
-			Menu::addMenuItem($this->activeUser->username, 'user/view/'. $this->activeUser->id, null, null, 'right')
-				->addMenuChild($this->activeUser->username, 'My Messages... ('. $this->activeUser->unreadMessageCount .')', 'messages')
-				->addMenuChild($this->activeUser->username, 'Edit Profile', 'user/account')
-				->addMenuChild($this->activeUser->username, 'Logout', 'logout');
-
 			// Manage Menu
 			if ($this->hasPermission('DEVELOPER')) {
 				Menu::addMenuItem('Management', null, null, null, 'right')
@@ -46,6 +40,14 @@ class MenuController extends Core_BaseController
 						->addMenuChild('Management', 'My Github Issues', 'github/user');
 				}
 			}
+
+			// User Menu
+			Menu::addMenuItem($this->activeUser->username, 'user/view/'. $this->activeUser->id, null, null, 'right')
+				->addMenuChild($this->activeUser->username, 'My Messages... ('. $this->activeUser->unreadMessageCount .')', 'messages')
+				->addMenuChild($this->activeUser->username, 'Favorites', 'user/favorites')
+				->addMenuChild($this->activeUser->username, 'Unwatched Videos', 'user/unwatched')
+				->addMenuChild($this->activeUser->username, 'Edit Profile', 'user/account')
+				->addMenuChild($this->activeUser->username, 'Logout', 'logout');
 		} else {
 			Menu::addMenuItem('Login', 'login', null, null, 'right');
 			Menu::addMenuItem('Register', 'register', null, null, 'right');

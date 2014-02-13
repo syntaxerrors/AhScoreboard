@@ -20,7 +20,6 @@ class CreateForumCategoriesTable extends Migration {
             $table->string('keyName')->index();
             $table->text('description');
             $table->integer('position')->nullable()->index();
-            $table->string('game_id', 10)->nullable()->index();
             $table->timestamps();
             $table->softDeletes();
         });

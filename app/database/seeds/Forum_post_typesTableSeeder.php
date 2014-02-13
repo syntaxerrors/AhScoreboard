@@ -41,7 +41,7 @@ class Forum_post_typesTableSeeder extends Seeder {
         	array(
 	        	'name' => 'Inner Thought',
 	        	'keyName' => 'inner-thought',
-	        	'description' => 'A post or reply that contains a character\'s internal dialog.',
+	        	'description' => 'A post or reply that contains internal dialog.',
 	        	'created_at' => date('Y-m-d H:i:s')
 	        ),
         	array(
@@ -53,7 +53,7 @@ class Forum_post_typesTableSeeder extends Seeder {
         	array(
 	        	'name' => 'Application',
 	        	'keyName' => 'application',
-	        	'description' => 'A post requesting access to a game.',
+	        	'description' => 'A post requesting access to anything.',
 	        	'created_at' => date('Y-m-d H:i:s')
 	        ),
         );

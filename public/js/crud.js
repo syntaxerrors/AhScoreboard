@@ -28,12 +28,12 @@
 	};
 
 	$.setUpEditLink = function() {
-		editLink = '<a href="javascript:void();" class="btn btn-mini btn-primary" onClick="editDetails(\''+ resourceId +'\');">Edit</a>';
+		editLink = '<a href="javascript:void();" class="btn btn-xs btn-primary" onClick="editDetails(\''+ resourceId +'\');">Edit</a>';
 	}
 
 	$.setUpDeleteLink = function() {
 		if (settings.deleteFlag == true) {
-			deleteLink = '<a href="'+ rootPath + settings.deleteLink + resource[settings.deleteProperty] +'" class="confirm-remove btn btn-mini btn-danger">Delete</a>';
+			deleteLink = '<a href="'+ rootPath + settings.deleteLink + resource[settings.deleteProperty] +'" class="confirm-remove btn btn-xs btn-danger">Delete</a>';
 		} else {
 			deleteLink = '';
 		}

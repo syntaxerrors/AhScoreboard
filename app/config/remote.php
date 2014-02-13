@@ -33,7 +33,7 @@ return array(
 			'password'  => 'stygicide',
 			'key'       => '',
 			'keyphrase' => '',
-			'root'      => '/home/stygian/public_control'
+			'root'      => '/home/stygian/dev/ah'
 		),
 
 	),
