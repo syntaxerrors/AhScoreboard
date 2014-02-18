@@ -2,8 +2,24 @@
 
 class ManageController extends BaseController {
 
+	public function getReset()
+	{
+		$videos = Video::all()->each(function($video) {
+			if ($video->checkType('CO_OP')) {
+				$video->rounds->delete();
+			}
+		});
+	}
+
 	public function getIndex($series = null, $game = null)
 	{
+
+		// $videos = Video::all();
+
+		// foreach ($videos as $video) {
+		// 	$video->updateActors();
+		// 	$video->updateGames();
+		// }
 		$paginator = true;
 
 		if ($series != null && $game != null) {
@@ -141,25 +157,171 @@ class ManageController extends BaseController {
 				$round = Round::find($roundId);
 				$round->modify($input);
 			} else {
-				if ($input['type'] == 'nextRound' || $input['type'] == 'addRound') {
+				if ($input['type'] == 'nextRound' || $input['type'] == 'addRound' || $input['type'] == 'finish') {
 					$video->addRound($input);
 				}
 			}
 		}
 		if ($input['type'] == 'nextRound') {
-			$nextRound = Round::where('video_id', $video->id)
-							  ->where('roundNumber', '>', $round->roundNumber)
-							  ->orderBy('roundNumber', 'asc')
-							  ->first();
+			if (isset($round)) {
+				$nextRound = Round::where('video_id', $video->id)
+								  ->where('roundNumber', '>', $round->roundNumber)
+								  ->orderBy('roundNumber', 'asc')
+								  ->first();
 
-			if (isset($nextRound->id)) {
-				$link = '/manage/detail/'. $video->id .'/'. $nextRound->id;
+				if (isset($nextRound->id)) {
+					$link = '/manage/detail/'. $video->id .'/'. $nextRound->id;
+				} else {
+					$link = '/manage/detail/'. $video->id;
+				}
 			} else {
 				$link = '/manage/detail/'. $video->id;
 			}
 			return $this->redirect($link, 'Round saved.');
 		} elseif ($input['type'] == 'addRound') {
 			return $this->redirect('/manage/detail/'. $video->id, 'Round added.');
+		} elseif ($input['type'] == 'finish') {
+			if ($video->checkType('OVERALL_WINNER')) {
+				return $this->redirect('/manage/overall-winner/'. $video->id, 'Winner added.');
+			} else {
+				return $this->redirect('/manage', 'Winner added.');
+			}
+		}
+	}
+
+	public function postAddWaves($videoId, $roundId = null)
+	{
+		$this->skipView();
+
+		$input = e_array(Input::all());
+
+		if ($input != null) {
+			$video = Video::find($videoId);
+
+			if ($roundId != null) {
+				$round = Round::find($roundId);
+				$round->wave->modify($input);
+			} else {
+				if ($input['type'] == 'nextRound' || $input['type'] == 'addRound' || $input['type'] == 'finish') {
+					$video->addRoundWave($input);
+				}
+			}
+		}
+		if ($input['type'] == 'nextRound') {
+			if (isset($round)) {
+				$nextRound = Round::where('video_id', $video->id)
+								  ->where('roundNumber', '>', $round->roundNumber)
+								  ->orderBy('roundNumber', 'asc')
+								  ->first();
+
+				if (isset($nextRound->id)) {
+					$link = '/manage/detail/'. $video->id .'/'. $nextRound->id;
+				} else {
+					$link = '/manage/detail/'. $video->id;
+				}
+			} else {
+				$link = '/manage/detail/'. $video->id;
+			}
+			return $this->redirect($link, 'Round saved.');
+		} elseif ($input['type'] == 'addRound') {
+			return $this->redirect('/manage/detail/'. $video->id, 'Round added.');
+		} elseif ($input['type'] == 'finish') {
+			return $this->redirect('/manage/overall-winner', 'Winner added.');
+		}
+	}
+
+	public function postAddCoop($videoId, $roundId = null)
+	{
+		$this->skipView();
+
+		$input = e_array(Input::all());
+
+		if ($input != null) {
+			$video = Video::find($videoId);
+
+			if ($roundId != null) {
+				$round = Round::find($roundId);
+				$round->coopStat->modify($input);
+			} else {
+				if ($input['type'] == 'nextRound' || $input['type'] == 'addRound' || $input['type'] == 'finish') {
+					$video->addRoundCoop($input);
+				}
+			}
+		}
+		if ($input['type'] == 'nextRound') {
+			if (isset($round)) {
+				$nextRound = Round::where('video_id', $video->id)
+								  ->where('roundNumber', '>', $round->roundNumber)
+								  ->orderBy('roundNumber', 'asc')
+								  ->first();
+
+				if (isset($nextRound->id)) {
+					$link = '/manage/detail/'. $video->id .'/'. $nextRound->id;
+				} else {
+					$link = '/manage/detail/'. $video->id;
+				}
+			} else {
+				$link = '/manage/detail/'. $video->id;
+			}
+			return $this->redirect($link, 'Round saved.');
+		} elseif ($input['type'] == 'addRound') {
+			return $this->redirect('/manage/detail/'. $video->id, 'Round added.');
+		} elseif ($input['type'] == 'finish') {
+			return $this->redirect('/manage/overall-winner', 'Winner added.');
+		}
+	}
+
+	public function getOverallWinner($videoId)
+	{
+		$video = Video::find($videoId);
+
+		$teams  = Team::orderByNameAsc();
+		$actors = Actor::orderByNameAsc();
+
+		if (!$video->checkType('ROUND_BASED_ACTORS')) {
+			$actorsMorph = $video->actors->filter(function ($actor) {
+				if ($actor->morph_type == 'Actor') {
+					return true;
+				}
+			});
+			$teamMorphs = $video->actors->filter(function ($actor) {
+				if ($actor->morph_type == 'Team') {
+					return true;
+				}
+			});
+
+			if ($actorsMorph->count() > 0) {
+				$actors->whereIn('uniqueId', $actorsMorph->morph_id->toArray());
+			}
+			if ($teamMorphs->count() > 0) {
+				$teams->whereIn('uniqueId', $teamMorphs->morph_id->toArray());
+			}
+		}
+
+		$actors = $actors->get();
+		$teams  = $teams->get();
+
+		$teamsArray   = $this->arrayToSelect($teams, 'id', 'name', 'Select a team');
+		$actorsArray = $this->arrayToSelect($actors, 'id', 'name', 'Select an actor');
+
+		$this->setViewData('video', $video);
+		$this->setViewData('teams', $teams);
+		$this->setViewData('actors', $actors);
+		$this->setViewData('teamsArray', $teamsArray);
+		$this->setViewData('actorsArray', $actorsArray);
+		$this->setViewData('roundId', null);
+	}
+
+	public function postOverallWinner($videoId)
+	{
+		$this->skipView();
+
+		$input = e_array(Input::all());
+
+		if ($input != null) {
+			Video::find($videoId)->addOverallWinners($input);
+
+			return $this->redirect('/manage', 'Overall winner added.');
 		}
 	}
 

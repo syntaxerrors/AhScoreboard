@@ -15,5 +15,13 @@ class RoundObserver {
 		if ($model->game != null) {
 			$model->game->delete();
 		}
+
+		if ($model->coopStat != null) {
+			$model->coopStat->delete();
+		}
+
+		if ($model->wave != null) {
+			$model->wave->delete();
+		}
 	}
 }

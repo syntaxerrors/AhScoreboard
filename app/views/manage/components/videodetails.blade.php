@@ -5,7 +5,7 @@
 			<div class="panel-body">
 				<strong>Games</strong>
 				<br />
-				{{ implode('<br />', $video->games->game->name->toArray()) }}
+				{{ implode('<br />', $video->games->game->labelName->toArray()) }}
 				<hr />
 				<strong>Actors</strong>
 				<br />

@@ -35,6 +35,8 @@ class Video extends BaseModel
 	 *******************************************************************/
 	public static $relationsData = array(
 		'series'  => array('belongsTo', 'Series',		'foreignKey' => 'series_id'),
+		'parent'  => array('belongsTo', 'Video',		'foreignKey' => 'parentId'),
+		'child'   => array('hasOne',  'Video',			'foreignKey' => 'parentId'),
 		'types'   => array('hasMany', 'Video_Type',		'foreignKey' => 'video_id'),
 		'games'   => array('hasMany', 'Video_Game',		'foreignKey' => 'video_id'),
 		'actors'  => array('hasMany', 'Video_Actor',	'foreignKey' => 'video_id'),
@@ -46,6 +48,12 @@ class Video extends BaseModel
 	/********************************************************************
 	 * Getter and Setter methods
 	 *******************************************************************/
+	public function getCoopPercentageAttribute()
+	{
+		$winRounds = clone $this->rounds;
+		$wins = $winRounds->coopStat->where('winFlag', 1)->count();
+		return percent($wins, $this->rounds->count()) .'%';
+	}
 
 	/********************************************************************
 	 * Extra Methods
@@ -59,51 +67,115 @@ class Video extends BaseModel
 	public function updateActors()
 	{
 		if ($this->checkType('ROUND_BASED_ACTORS')) {
-			foreach ($this->actors as $actor) {
-				// $actor->delete();
+			$actors = clone $this->actors;
+			foreach ($actors as $actor) {
+				$actor->delete();
+				$actors = new \Utility_Collection();
 			}
+
+			$newActors = array();
+			$newTeams  = array();
 
 			foreach ($this->rounds as $round) {
 				foreach ($round->actors as $actor) {
+					if ($actor->morph_type == 'Actor' && in_array($actor->morph_id, $newActors)) continue;
+					if ($actor->morph_type == 'Team' && in_array($actor->morph_id, $newTeams)) continue;
+
 					// Check if the video has this actor already
-					$existingActor = $this->actors->filter(function ($videoActor) use ($actor) {
+					$videoActors = clone $actors;
+					$existingActor = $videoActors->filter(function ($videoActor) use ($actor) {
 						if ($videoActor->morph_type == $actor->morph_type && $videoActor->morph_id == $actor->morph_id) return true;
 					});
-					ppd($existingActor);
 
-					if ($existingActor == null) {
+					if ($existingActor->count() == 0) {
 						$newVideoActor             = new Video_Actor;
 						$newVideoActor->video_id   = $this->id;
 						$newVideoActor->morph_id   = $actor->morph_id;
 						$newVideoActor->morph_type = $actor->morph_type;
 
 						$newVideoActor->save();
+
+						if ($actor->morph_type == 'Actor') {
+							$newActors[] = $actor->morph_id;
+						} else {
+							$newTeams[] = $actor->morph_id;
+						}
 					}
 				}
 			}
+
+			return true;
 		}
 	}
 
 	public function updateGames()
 	{
 		if ($this->checkType('ROUND_BASED_GAMES')) {
-			foreach ($this->games as $game) {
-				// $actor->delete();
+			$games = clone $this->games;
+			foreach ($games as $game) {
+				$game->delete();
+				$games = new \Utility_Collection();
 			}
 
+			$newGames = array();
+
 			foreach ($this->rounds as $round) {
+				if (in_array($round->game->game_id, $newGames)) continue;
+
 				// Check if the video has this game already
-				$existingGame = $this->games->filter(function ($videoGame) use ($round) {
+				$existingGame = $games->filter(function ($videoGame) use ($round) {
 					if ($videoGame->game_id == $round->game->game_id) return true;
 				});
-				ppd($existingGame);
 
-				if ($existingGame == null) {
+				if ($existingGame->count() == 0) {
 					$newVideoGame           = new Video_Game;
 					$newVideoGame->video_id = $this->id;
 					$newVideoGame->game_id  = $round->game->game_id;
 
 					$newVideoGame->save();
+
+					$newGames[] = $round->game->game_id;
+				}
+			}
+		}
+	}
+
+	public function addWinners($input)
+	{
+		if (!$this->checkType('OVERALL_WINNER')) {
+			$this->createWinners($input);
+		}
+	}
+
+	public function addOverallWinners($input)
+	{
+		$this->winners->delete();
+		$this->createWinners($input);
+	}
+
+	protected function createWinners($input)
+	{
+		if (isset($input['winners'])) {
+			foreach ($input['winners'] as $type => $winners) {
+				if (is_array($winners)) {
+					foreach ($winners as $actorId) {
+						if ($actorId == '0') continue;
+
+						$videoWinner             = new Video_Winner;
+						$videoWinner->video_id   = $this->id;
+						$videoWinner->morph_type = ucwords($type);
+						$videoWinner->morph_id   = $actorId;
+
+						$videoWinner->save();
+					}
+				} else {
+					if ($winners == '0') continue;
+					$videoWinner             = new Video_Winner;
+					$videoWinner->video_id   = $this->id;
+					$videoWinner->morph_type = ucwords($type);
+					$videoWinner->morph_id   = $winners;
+
+					$videoWinner->save();
 				}
 			}
 		}
@@ -191,5 +263,23 @@ class Video extends BaseModel
 				$newVideoGame->save();
 			}
 		}
+
+		$this->addWinners($input);
+
+		return $round;
+	}
+
+	public function addRoundWave($input)
+	{
+		$round = $this->addRound($input);
+
+		$round->addWave($input);
+	}
+
+	public function addRoundCoop($input)
+	{
+		$round = $this->addRound($input);
+
+		$round->addCoop($input);
 	}
 }

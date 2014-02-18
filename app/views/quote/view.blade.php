@@ -24,7 +24,7 @@
 							</div>
 							<div class="col-md-4">
 								<h4>Actors in this quote</h4>
-								{{ implode('<br />', $quote->actors->actor->link->toArray()) }}
+								{{ implode('<br />', $quote->actors->where('morph_type', 'Actor')->actor->link->toArray()) }}
 							</div>
 						</div>
 					</div>

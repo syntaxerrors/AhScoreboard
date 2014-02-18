@@ -49,6 +49,10 @@ class Video_Quote extends BaseModel
 	{
 		return HTML::link('/quotes/view/'. $this->id, $this->title) .'&nbsp;<a href="javascript:void(0);" onClick="youTubeTime(\''. $this->video->link .'\',\''. $this->youtubeTimestamp .'\', \''. $this->endTime .'\', \''. $this->id .'\');"><i class="fa fa-youtube"></i></a>';
 	}
+	public function getLinkOnlyAttribute()
+	{
+		return HTML::link('/quotes/view/'. $this->id, $this->title);
+	}
 
 	/********************************************************************
 	 * Extra Methods

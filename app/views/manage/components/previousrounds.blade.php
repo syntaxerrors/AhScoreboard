@@ -6,36 +6,64 @@
 				<table class="table table-condensed">
 					<tbody>
 						@foreach ($video->rounds as $videoRound)
-							<?php
-								$winners = implode(', ', $videoRound->winners->morph->link->toArray());
-							?>
-							<tr>
-								<td>{{ $videoRound->roundNumber }}</td>
-								@if ($video->checkType('ROUND_BASED_GAMES'))
-									<td>{{ $videoRound->games->game->name }}</td>
-								@endif
-								@if ($video->checkType('ROUND_BASED_ACTORS'))
-									<?php
-										$actors = implode('<br />', $videoRound->actors->morph->name->toArray());
-									?>
-									<td>
-										<a href="javascript: void();" rel="popover" data-toggle="popover" data-trigger="{{ $activeUser->popover }}" data-placement="right" data-content="{{ $actors }}" data-html="true" title data-original-title="Actors">
-											Actors
-										</a>
+							@if ($video->checkType('WAVES'))
+								<tr>
+									<td>{{ $videoRound->roundNumber }}</td>
+									<td>{{ $videoRound->wave->highestWave }}</td>
+									<td class="text-right">
+										<div class="btn-group">
+											@if (!isset($round) || $round->id != $videoRound->id)
+												<a href="/manage/detail/{{ $video->id }}/{{ $videoRound->id }}" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i></a>
+												<a href="/manage/delete-round/{{ $videoRound->id }}" class="confirm-remove btn btn-xs btn-danger"><i class="fa fa-trash-o"></i></a>
+											@endif
+										</div>
 									</td>
-								@endif
-								<td>
-									{{ $winners }}
-								</td>
-								<td class="text-right">
-									<div class="btn-group">
-										@if (!isset($round) || $round->id != $videoRound->id)
-											<a href="/manage/detail/{{ $video->id }}/{{ $videoRound->id }}" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i></a>
-											<a href="/manage/delete-round/{{ $videoRound->id }}" class="confirm-remove btn btn-xs btn-danger"><i class="fa fa-trash-o"></i></a>
-										@endif
-									</div>
-								</td>
-							</tr>
+								</tr>
+							@elseif ($video->checkType('CO_OP'))
+								<tr>
+									<td>{{ $videoRound->roundNumber }}</td>
+									<td>{{ $videoRound->coopStat->display }}</td>
+									<td class="text-right">
+										<div class="btn-group">
+											@if (!isset($round) || $round->id != $videoRound->id)
+												<a href="/manage/detail/{{ $video->id }}/{{ $videoRound->id }}" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i></a>
+												<a href="/manage/delete-round/{{ $videoRound->id }}" class="confirm-remove btn btn-xs btn-danger"><i class="fa fa-trash-o"></i></a>
+											@endif
+										</div>
+									</td>
+								</tr>
+							@else
+								<?php
+									$winners = implode(', ', $videoRound->winners->morph->link->toArray());
+								?>
+								<tr>
+									<td>{{ $videoRound->roundNumber }}</td>
+									@if ($video->checkType('ROUND_BASED_GAMES'))
+										<td>{{ $videoRound->game->game->name }}</td>
+									@endif
+									@if ($video->checkType('ROUND_BASED_ACTORS'))
+										<?php
+											$actors = implode('<br />', $videoRound->actors->morph->name->toArray());
+										?>
+										<td>
+											<a href="javascript: void();" rel="popover" data-toggle="popover" data-trigger="{{ $activeUser->popover }}" data-placement="right" data-content="{{ $actors }}" data-html="true" title data-original-title="Actors">
+												Actors
+											</a>
+										</td>
+									@endif
+									<td>
+										{{ $winners }}
+									</td>
+									<td class="text-right">
+										<div class="btn-group">
+											@if (!isset($round) || $round->id != $videoRound->id)
+												<a href="/manage/detail/{{ $video->id }}/{{ $videoRound->id }}" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i></a>
+												<a href="/manage/delete-round/{{ $videoRound->id }}" class="confirm-remove btn btn-xs btn-danger"><i class="fa fa-trash-o"></i></a>
+											@endif
+										</div>
+									</td>
+								</tr>
+							@endif
 						@endforeach
 						@if ($video->checkType('OVERALL_WINNER'))
 							@if ($video->winners->count() > 0)

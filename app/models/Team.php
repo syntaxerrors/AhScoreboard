@@ -45,6 +45,10 @@ class Team extends BaseModel
 	{
 		return HTML::link('/team/view/'. $this->id, $this->name);
 	}
+	public function getFirstNameLinkAttribute()
+	{
+		return HTML::link('/team/view/'. $this->id, $this->name);
+	}
 
 	/********************************************************************
 	 * Extra Methods

@@ -10,8 +10,8 @@
 			<table class="table table-hover table-condensed table-striped">
 				<thead>
 					<tr>
-						<th class="text-center">Tower</th>
 						<th>Title</th>
+						<th>Type</th>
 						<th>Series Number</th>
 						<th class="text-center">Starring</th>
 						<th class="text-center">Rounds</th>
@@ -24,7 +24,8 @@
 				<tbody>
 					@foreach ($videos as $video)
 						<?php
-							if ($video->checkType('OVERALL_WINNER') == 1) {
+							$winners = null;
+							if ($video->checkType('OVERALL_WINNER')) {
 								$winners = implode('<br />', $video->winners->morph->name->toArray());
 							} else {
 								$winners = implode('<br />', $video->rounds->winners->morph->name->toArray());
@@ -33,8 +34,18 @@
 							$actors = implode('<br />', $video->actors->morph->name->toArray());
 						?>
 						<tr>
-							<td class="text-primary text-center">{{ ($video->forTheTowerFlag == 1 ? '<i class="fa fa-check-square-o fa-lg"></i>' : null) }}</td>
 							<td>{{ stripslashes($video->title) }}</td>
+							@if ($video->series->checkType('NON_GAME'))
+								<td><span class="label label-danger">Non Game</span></td>
+							@elseif ($video->checkType('WAVES'))
+								<td><span class="label label-success">Waves</span></td>
+							@elseif ($video->checkType('CO_OP'))
+								<td><span class="label label-info">Co-op</span></td>
+							@elseif ($video->checkType('FOR_THE_TOWER'))
+								<td><span class="label label-warning">Tower of Pimps</span></td>
+							@else
+								<td>&nbsp;</td>
+							@endif
 							<td>{{ $video->seriesNumber }}</td>
 							<td class="text-center">
 								@if ($video->actors->count() > 0)
@@ -46,8 +57,26 @@
 							<td class="text-center">{{ $video->rounds->count() }}</td>
 							<td class="text-center">
 								@if ($video->checkType('CO_OP'))
+									@if ($video->rounds->coopStat->count() > 0)
+										<?php
+											$coopDetails = $video->coopPercentage .'<hr />';
+											$coopDetails .= implode('<br />', $video->rounds->coopStat->displayClean->toArray());
+										?>
+										<a href="javascript: void();" rel="popover" data-toggle="popover" data-trigger="{{ $activeUser->popover }}" data-placement="left" data-content="{{ $coopDetails }}" data-html="true" title data-original-title="Co-Op Stats">
+											<i class="fa fa-trophy"></i>
+										</a>
+									@endif
+								@elseif ($video->checkType('WAVES'))
+									@if ($video->rounds->wave->count() > 0)
+										<?php
+											$waveDetails = implode('<br />', $video->rounds->wave->highestWave->toArray());
+										?>
+										<a href="javascript: void();" rel="popover" data-toggle="popover" data-trigger="{{ $activeUser->popover }}" data-placement="left" data-content="{{ $waveDetails }}" data-html="true" title data-original-title="Highest Waves">
+											<i class="fa fa-trophy"></i>
+										</a>
+									@endif
 								@else
-									@if ($video->rounds->winners->count() > 0)
+									@if ($winners != null)
 										<a href="javascript: void();" rel="popover" data-toggle="popover" data-trigger="{{ $activeUser->popover }}" data-placement="left" data-content="{{ $winners }}" data-html="true" title data-original-title="Winners">
 											<i class="fa fa-trophy"></i>
 										</a>
@@ -58,10 +87,7 @@
 							<td>{{ date('F jS, Y', strtotime($video->date)) }}</td>
 							<td class="text-center">
 								<div class="btn-group">
-									@if ($video->checkType('CO_OP'))
-									@else
-										{{ HTML::link('/manage/detail/'. $video->id, 'Winners', array('class' => 'btn btn-xs btn-primary')) }}
-									@endif
+									{{ HTML::link('/manage/detail/'. $video->id, 'Details', array('class' => 'btn btn-xs btn-primary')) }}
 									<button class="btn btn-xs btn-inverse dropdown-toggle" data-toggle="dropdown">
 										<span class="caret"></span>
 									</button>
@@ -69,6 +95,7 @@
 										@if ($video->checkType('OVERALL_WINNER'))
 											<li>{{ HTML::link('/manage/overall-winner/'. $video->id, 'Overall') }}</li>
 										@endif
+										<li>{{ HTML::link('/video/view/'. $video->id, 'View') }}</li>
 										<li>{{ HTML::link('/video/edit/'. $video->id, 'Edit') }}</li>
 										<li>{{ HTML::link('/video/delete/'. $video->id, 'Delete', array('class' => 'confirm-remove text-error')) }}</li>
 									</ul>

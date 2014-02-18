@@ -32,10 +32,12 @@ class Round extends BaseModel
 	 * Relationships
 	 *******************************************************************/
 	public static $relationsData = array(
-		'video'   => array('belongsTo', 'Video',			'foreignKey' => 'video_id'),
-		'game'    => array('hasOne', 'Round_Game',		'foreignKey' => 'round_id'),
-		'actors'  => array('hasMany', 'Round_Actor',	'foreignKey' => 'round_id'),
-		'winners' => array('hasMany', 'Round_Winner',	'foreignKey' => 'round_id'),
+		'video'     => array('belongsTo',	'Video',		'foreignKey' => 'video_id'),
+		'game'      => array('hasOne',		'Round_Game',	'foreignKey' => 'round_id'),
+		'actors'    => array('hasMany',		'Round_Actor',	'foreignKey' => 'round_id'),
+		'winners'   => array('hasMany',		'Round_Winner',	'foreignKey' => 'round_id'),
+		'coopStat'  => array('hasOne',		'Round_Coop',	'foreignKey' => 'round_id'),
+		'wave'      => array('hasOne',		'Round_Wave',	'foreignKey' => 'round_id'),
 	);
 
 	/********************************************************************
@@ -48,7 +50,7 @@ class Round extends BaseModel
 	public function modify($input)
 	{
 		// Handle the actors
-		if (count($input['actors']) > 0) {
+		if (isset($input['actors']) && count($input['actors']) > 0) {
 			foreach ($this->actors as $actor) {
 				$actor->delete();
 			}
@@ -69,7 +71,7 @@ class Round extends BaseModel
 		}
 
 		// Handle the winners
-		if (count($input['winners']) > 0) {
+		if (isset($input['winners']) && count($input['winners']) > 0) {
 			foreach ($this->winners as $winner) {
 				$winner->delete();
 			}
@@ -110,6 +112,34 @@ class Round extends BaseModel
 
 			// Make sure the video knows about the game
 			$this->video->updateGames();
+		}
+	}
+
+	public function addWave($input)
+	{
+		if (isset($input['highestWave'])) {
+			$newWave              = new Round_Wave;
+			$newWave->round_id    = $this->id;
+			$newWave->highestWave = $input['highestWave'];
+
+			$newWave->save();
+		}
+	}
+
+	public function addCoop($input)
+	{
+		if (isset($input['status'])) {
+			$newCoop              = new Round_Coop;
+			$newCoop->round_id    = $this->id;
+			if ($input['status'] == 'WON') {
+				$newCoop->lossFlag = 0;
+				$newCoop->winFlag  = 1;
+			} else {
+				$newCoop->lossFlag = 1;
+				$newCoop->winFlag  = 0;
+			}
+
+			$newCoop->save();
 		}
 	}
 }

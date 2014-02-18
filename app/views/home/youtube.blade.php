@@ -2,6 +2,6 @@
 	'class'			=> 'youtube-player',
 	'type'			=> 'text/html',
 	'height'		=> '420',
-	'width'			=> '700',
+	'width'			=> '100%',
 	'frameborder'	=> 0
 )) }}

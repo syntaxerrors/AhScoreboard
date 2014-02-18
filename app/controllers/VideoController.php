@@ -74,13 +74,14 @@ class VideoController extends BaseController {
 			});
 			$seriesId = (isset($series->id[0]) ? $series->id[0] : 0);
 			$gameId   = (isset($game->id[0]) ? $game->id[0] : 0);
-		} else {
-			$seriesId = 0;
-			$gameId   = 0;
-		}
 
-		preg_match('/[0-9]+/', $title, $matches);
-		$seriesNumber = $matches[0];
+			preg_match('/[0-9]+/', $title, $matches);
+			$seriesNumber = $matches[0];
+		} else {
+			$seriesId     = 0;
+			$gameId       = 0;
+			$seriesNumber = 0;
+		}
 
 		// Get all data
 		$series = Series::orderByNameAsc()->get()->toSelectArray('Select a series');
@@ -150,10 +151,11 @@ class VideoController extends BaseController {
 				}
 			}
 
-			if (isset($input['details'])) {
-				$link = ($video->checkType('CO_OP') ? 'coopstats' : 'winners');
+			// Get the image
+			Image::make('http://img.youtube.com/vi/'. $video->link .'/hqdefault.jpg')->save(public_path() .'/img/youtube/'. $video->id .'.jpg');
 
-				return $this->redirect('/manage/'. $link .'/'. $video->id, $video->title .' has been submitted.');
+			if (isset($input['details'])) {
+				return $this->redirect('/manage/detail/'. $video->id, $video->title .' has been submitted.');
 			} else {
 				return $this->redirect('/manage', $video->title .' has been submitted.');
 			}
@@ -195,6 +197,7 @@ class VideoController extends BaseController {
 			$video->series_id             = $input['series_id'];
 			$video->seriesNumber          = $input['seriesNumber'];
 			$video->title                 = $input['title'];
+			$video->parentId              = $input['parentId'] != '0' ? $input['parentId'] : null;
 			$video->link                  = $this->getYoutubeId($input['link']);
 			$video->date                  = date('Y-m-d', strtotime($input['date']));
 
@@ -222,19 +225,20 @@ class VideoController extends BaseController {
 
 				$this->save($videoGame);
 			}
+			if (isset($input['actor'])) {
+				foreach ($video->actors as $actor) {
+					$actor->delete();
+				}
+				foreach ($input['actor'] as $actor => $value) {
+					$bits = explode('::', $actor);
 
-			foreach ($video->actors as $actor) {
-				$actor->delete();
-			}
-			foreach ($input['actor'] as $actor => $value) {
-				$bits = explode('::', $actor);
+					$videoActor             = new Video_Actor;
+					$videoActor->video_id   = $video->id;
+					$videoActor->morph_id   = $bits[1];
+					$videoActor->morph_type = $bits[0];
 
-				$videoActor             = new Video_Actor;
-				$videoActor->video_id   = $video->id;
-				$videoActor->morph_id   = $bits[1];
-				$videoActor->morph_type = $bits[0];
-
-				$this->save($videoActor);
+					$this->save($videoActor);
+				}
 			}
 
 			if (isset($input['details'])) {

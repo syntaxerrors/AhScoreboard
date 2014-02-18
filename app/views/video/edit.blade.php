@@ -17,6 +17,7 @@
 						</div>
 					@endif
 					{{ bForm::text('seriesNumber', $video->seriesNumber, array('id' => 'seriesNumber'), 'Video Number') }}
+					{{ bForm::select('parentId', Video::orderBy('title', 'asc')->get()->toSelectArray('Select a video', 'id', 'title'), $video->parentId, array('id' => 'parentId'), 'Parent Video') }}
 					{{ bForm::text('title', $video->title, array('id' => 'title', 'required' => 'required'), 'Title') }}
 					{{ bForm::text('link', $video->link, array('id' => 'link', 'required' => 'required'), 'YouTube Link') }}
 					{{ bForm::date('date', $video->date, array(),  'Date') }}

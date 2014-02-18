@@ -34,6 +34,14 @@ class Game extends BaseModel
 	/********************************************************************
 	 * Getter and Setter methods
 	 *******************************************************************/
+	public function getLabelNameAttribute()
+	{
+		if ($this->checkType('CHALLENGE')) {
+			return '<span class="label label-success">Challenge</span>&nbsp;'. $this->name;
+		}
+
+		return $this->name;
+	}
 
 	/********************************************************************
 	 * Extra Methods

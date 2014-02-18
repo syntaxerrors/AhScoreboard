@@ -46,7 +46,14 @@
 					@if ($video->checkType('ROUND_BASED_GAMES'))
 						<div class="row">
 							<div class="col-md-11">
-								{{ bForm::select('game_id', $games, null) }}
+								<?php
+									if ($roundId != null && isset($round) && $round->game != null) {
+										$gameId = $round->game->game->id;
+									} else {
+										$gameId = null;
+									}
+								?>
+								{{ bForm::select('game_id', $games, $gameId) }}
 							</div>
 							<div class="col-md-1">
 								<a role="button" href="#remoteModal" data-toggle="modal" data-remote="/manage/newgame" class="btn btn-xs btn-primary" style="margin-bottom: -20px;">

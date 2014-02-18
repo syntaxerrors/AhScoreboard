@@ -5,7 +5,13 @@
 		</div>
 	@else
 		<div class="col-md-6">
-			@include('manage.components.winners')
+			@if ($video->checkType('CO_OP'))
+				@include('manage.components.coop')
+			@elseif ($video->checkType('WAVES'))
+				@include('manage.components.waves')
+			@else
+				@include('manage.components.winners')
+			@endif
 		</div>
 		<div class="col-md-6">
 			@include('manage.components.quotes')

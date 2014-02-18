@@ -29,15 +29,19 @@
 									{{ implode('<br />', $video->quotes->link->toArray()) }}
 								</div>
 							@else
-								<div class="col-md-4">
+								<div class="col-md-3">
 									<h4>Actors</h4>
 									{{ implode('<br />', $video->actors->morph->link->toArray()) }}
 								</div>
-								<div class="col-md-4">
+								<div class="col-md-3">
 									<h4>Winners</h4>
 									{{ implode('<br />', $video->winners->morph->link->toArray()) }}
 								</div>
-								<div class="col-md-4">
+								<div class="col-md-3">
+									<h4>Games</h4>
+									{{ implode('<br />', $video->games->game->name->toArray()) }}
+								</div>
+								<div class="col-md-3">
 									<h4>Quotes</h4>
 									{{ implode('<br />', $video->quotes->link->toArray()) }}
 								</div>
@@ -55,6 +59,30 @@
 				@include('video.components.usermarks', array('videoId' => $video->id))
 			</div>
 		</div>
+		@if ($video->parent != null)
+			<?php $parent = $video->parent; ?>
+			<div class="panel panel-default">
+				<div class="panel-heading">Previous Videos in this Series</div>
+				<div class="panel-body">
+					@while ($parent != null)
+						{{ HTML::link('/video/view/'. $parent->id, $parent->title) }}<br />
+						<?php $parent = $parent->parent; ?>
+					@endwhile
+				</div>
+			</div>
+		@endif
+		@if ($video->child != null)
+			<div class="panel panel-default">
+				<div class="panel-heading">Next Videos in this Series</div>
+				<div class="panel-body">
+					<?php $child = $video->child; ?>
+					@while ($child != null)
+						{{ HTML::link('/video/view/'. $child->id, $child->title) }}<br />
+						<?php $child = $child->child; ?>
+					@endwhile
+				</div>
+			</div>
+		@endif
 	</div>
 </div>
 
