@@ -49,6 +49,8 @@ class AdminController extends Core_AdminController {
 				->addTab('Teams',            'teams')
 				->addTab('Team Actors',      'teamactors')
 				->addTab('Actors',           'actors')
+				->addTab('Actor Types',      'actortypes')
+				->addTab('Characters',       'characters')
 				->buildPanel()
 			->addPanel()
 				->setId('ADMIN_TYPES')
@@ -322,6 +324,69 @@ class AdminController extends Core_AdminController {
 		return Redirect::to('/admin#actors');
 	}
 
+	public function getCharacters()
+	{
+		$characters = Character::orderByNameAsc()->paginate(20);
+
+		// Set up the one page crud main details
+		Crud::setTitle('Characters')
+				 ->setSortProperty('firstName')
+				 ->setDeleteLink('/admin/characterdelete/')
+				 ->setDeleteProperty('id')
+				 ->setPaginationFlag(true)
+				 ->setResources($characters);
+
+		// Add the display columns
+		Crud::addDisplayField('name', '/characters/view/', 'id')
+				 ->addDisplayField('actor_name');
+
+		// Add the form fields
+		Crud::addFormField('name', 'text')
+				 ->addFormField('keyName', 'text')
+				 ->addFormField('actor_id', 'select', Actor::orderByNameAsc()->get()->toSelectArray('Select an actor'));
+
+		// Set the view data
+		Crud::make();
+	}
+
+	public function postCharacters()
+	{
+		$this->skipView();
+
+		// Set the input data
+		$input = e_array(Input::all());
+
+		if ($input != null) {
+			// Get the object
+			$character           = (isset($input['id']) && strlen($input['id']) == 10 ? Character::find($input['id']) : new Character);
+			$character->name     = $input['name'];
+			$character->keyName  = $input['keyName'];
+			$character->actor_id = $input['actor_id'] != '0' ? $input['actor_id'] : null;
+
+			// Attempt to save the object
+			$this->save($character);
+
+			// Handle errors
+			if ($this->errorCount() > 0) {
+				Ajax::addErrors($this->getErrors());
+			} else {
+				Ajax::setStatus('success')->addData('resource', $character->toArray());
+			}
+
+			// Send the response
+			return Ajax::sendResponse();
+		}
+	}
+
+	public function getCharacterdelete($characterId)
+	{
+		$this->skipView();
+
+		Character::find($characterId)->delete();
+
+		return Redirect::to('/admin#characters');
+	}
+
 	public function getTeamactors()
 	{
 		$teams        = Team::orderByNameAsc()->paginate(10);
@@ -387,6 +452,79 @@ class AdminController extends Core_AdminController {
 
 				Ajax::setStatus('success')
 									->addData('resource', $team->actors->toArray())
+									->addData('main', $main);
+			}
+
+			// Send the response
+			return Ajax::sendResponse();
+		}
+	}
+
+	public function getActortypes()
+	{
+		$actors       = Actor::orderByNameAsc()->paginate(10);
+		$types        = Type::orderByNameAsc()->get();
+		$typesArray   = $this->arrayToSelect($types, 'id', 'name', 'None');
+		$actorsArray  = $this->arrayToSelect($actors, 'id', 'fullName', 'Select an actor');
+
+		// Set up the one page crud
+		Crud::setTitle('Actor Types')
+				 ->setSortProperty('fullName')
+				 ->setPaginationFlag(true)
+				 ->setDeleteFlag(false)
+				 ->setMulti($actors, 'types')
+				 ->setMultiColumns(array('Actors', 'Types'))
+				 ->setMultiDetails(array('name' => 'fullName', 'field' => 'actor_id'))
+				 ->setMultiPropertyDetails(array('name' => 'name', 'field' => 'type_id'));
+
+		// Add the form fields
+		Crud::addFormField('actor_id', 'select', $actorsArray)
+				 ->addFormField('type_id', 'multiselect', $typesArray);
+
+		Crud::make();
+	}
+
+	public function postActortypes()
+	{
+		$this->skipView();
+
+		// Set the input data
+		$input = e_array(Input::all());
+
+		if ($input != null) {
+			// Remove all existing roles
+			$actorTypes = Actor_Type::where('actor_id', $input['actor_id'])->get();
+
+			if ($actorTypes->count() > 0) {
+				foreach ($actorTypes as $actorType) {
+					$actorType->delete();
+				}
+			}
+
+			// Add any new roles
+			if (count($input['type_id']) > 0) {
+				foreach ($input['type_id'] as $type_id) {
+					if ($type_id == '0') continue;
+
+					$actorType            = new Actor_Type;
+					$actorType->actor_id   = $input['actor_id'];
+					$actorType->type_id  = $type_id;
+
+					$this->save($actorType);
+				}
+			}
+
+			// Handle errors
+			if ($this->errorCount() > 0) {
+				Ajax::addErrors($this->getErrors());
+			} else {
+				$actor = Actor::find($input['actor_id']);
+
+				$main = $actor->toArray();
+				$main['multi'] = $actor->types->id->toJson();
+
+				Ajax::setStatus('success')
+									->addData('resource', $actor->types->toArray())
 									->addData('main', $main);
 			}
 

@@ -33,10 +33,12 @@ class Actor extends BaseModel
 	 * Relationships
 	 *******************************************************************/
 	public static $relationsData = array(
-		'teams'  => array('belongsToMany',	'Team',			'table' => 'team_actors'),
-		'videos' => array('belongsToMany',	'Video',		'table' => 'video_actors'),
-		'rounds' => array('belongsToMany',	'Round',		'table' => 'round_actors'),
-		'types'  => array('hasMany',		'Actor_Type',	'foreignKey' => 'actor_id'),
+		'teams'      => array('belongsToMany',	'Team',			'table' => 'team_actors'),
+		'videos'     => array('belongsToMany',	'Video',		'table' => 'video_actors', 'foreignKey' => 'morph_id', 'orderBy' => array('date', 'desc')),
+		'rounds'     => array('belongsToMany',	'Round',		'table' => 'round_actors', 'foreignKey' => 'morph_id'),
+		'types'      => array('belongsToMany',	'Type',			'table' => 'actor_types',  'foreignKey' => 'actor_id'),
+		'characters' => array('hasMany',		'Character',	'foreignKey' => 'actor_id'),
+		'wins'       => array('morphMany',		'Video_Winner',	'name'  => 'morph'),
 	);
 
 	/********************************************************************
@@ -59,11 +61,34 @@ class Actor extends BaseModel
 		return HTML::link('/actors/view/'. $this->id, $this->firstName);
 	}
 
+	public function getLatestVideoAttribute()
+	{
+		$lastVideoAsActor = $this->videos()->orderBy('date', 'desc')->orderBy('uniqueId', 'asc')->first();
+		if ($this->characters->count() > 0) {
+			$lastVideoAsCharacter = $this->characters->videos->first();
+
+			if ($lastVideoAsCharacter!= null && ($lastVideoAsActor == null || $lastVideoAsCharacter->date > $lastVideoAsActor->date)) {
+				return $lastVideoAsCharacter->linkTo .' as '. $lastVideoAsCharacter->characters->where('actor_id', $this->id)->first()->link;
+			}
+		}
+
+		if ($lastVideoAsActor != null) {
+			return $lastVideoAsActor->linkTo;
+		}
+
+		return null;
+	}
+
+	public function getVideosCountAttribute()
+	{
+		return $this->videos->count() + $this->characters->videos->count();
+	}
+
 	/********************************************************************
 	 * Extra Methods
 	 *******************************************************************/
 	public function scopeOrderByNameAsc($query)
 	{
-		return $query->orderBy('firstName', 'asc');
+		return $query->orderBy('firstName', 'asc')->orderBy('lastName', 'asc');
 	}
 }

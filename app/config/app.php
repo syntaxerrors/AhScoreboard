@@ -131,6 +131,7 @@ return array(
 		'Intervention\Image\ImageServiceProvider',
 		'anlutro\cURL\Laravel\cURLServiceProvider',
 		'McCool\LaravelAutoPresenter\LaravelAutoPresenterServiceProvider',
+		'Menu\MenuServiceProvider',
 		'Syntax\Core\CoreServiceProvider',
 		'Syntax\Core\View\ViewServiceProvider',
 		'Syntax\Core\Forum\ForumServiceProvider',
@@ -200,7 +201,8 @@ return array(
 		'Str'                         => 'Illuminate\Support\Str',
 		'URL'                         => 'Illuminate\Support\Facades\URL',
 		'Image'                       => 'Intervention\Image\Facades\Image',
-		'cURL'                        => 'anlutro\cURL\Laravel\cURL'
+		'cURL'                        => 'anlutro\cURL\Laravel\cURL',
+		'Menu'                        => 'Menu\Menu',
 	),
 
 );

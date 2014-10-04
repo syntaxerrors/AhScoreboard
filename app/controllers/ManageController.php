@@ -27,9 +27,7 @@ class ManageController extends BaseController {
 			$videos   = Video::where('series_id', $seriesId)->orderBy('date', 'desc')->get();
 
 			$videos = $videos->filter(function ($video) use ($game) {
-				if ($video->game->keyName == $game) {
-					return true;
-				}
+				if (in_array($game, $video->games->game->keyName->toArray())) return true;
 			});
 
 			$paginator = false;
@@ -51,58 +49,92 @@ class ManageController extends BaseController {
 		$this->activeUser->setWatched($videoId);
 
 		$video  = Video::find($videoId);
-		$teams  = Team::orderByNameAsc();
-		$actors = Actor::orderByNameAsc();
 
-		if (!$video->checkType('ROUND_BASED_ACTORS')) {
-			$actorsMorph = $video->actors->filter(function ($actor) {
-				if ($actor->morph_type == 'Actor') {
-					return true;
+		if ($video->series->checkType('CHARACTERS')) {
+			$characters = Character::orderByNameAsc()->get()->toSelectArray('Select a character');
+
+			$this->setViewData('video', $video);
+			$this->setViewData('roundId', $roundId);
+			$this->setViewData('characters', $characters);
+		} else {
+			$teams  = Team::orderByNameAsc();
+			$actors = Actor::orderByNameAsc();
+
+			if (!$video->checkType('ROUND_BASED_ACTORS')) {
+				$actorsMorph = $video->actors->filter(function ($actor) {
+					if ($actor->morph_type == 'Actor') {
+						return true;
+					}
+				});
+				$teamMorphs = $video->actors->filter(function ($actor) {
+					if ($actor->morph_type == 'Team') {
+						return true;
+					}
+				});
+
+				if ($actorsMorph->count() > 0) {
+					$actors->whereIn('uniqueId', $actorsMorph->morph_id->toArray());
 				}
-			});
-			$teamMorphs = $video->actors->filter(function ($actor) {
-				if ($actor->morph_type == 'Team') {
-					return true;
+				if ($teamMorphs->count() > 0) {
+					$teams->whereIn('uniqueId', $teamMorphs->morph_id->toArray());
 				}
+			}
+
+			$actors = $actors->get();
+			$teams  = $teams->get();
+
+			$ahActors = clone $actors;
+
+			$ahActors = $ahActors->filter(function ($actor) {
+				return $actor->checkType('AH_ACTOR');
 			});
 
-			if ($actorsMorph->count() > 0) {
-				$actors->whereIn('uniqueId', $actorsMorph->morph_id->toArray());
+			$actors = $actors->filter(function ($actor) {
+				return ! $actor->checkType('AH_ACTOR');
+			});
+
+			$teamsArray  = $teams->toSelectArray('Select an team');
+			$ahActorsArray = $ahActors->toSelectArray('Select an actor');
+			$nonAhActorsArray = $actors->toSelectArray(false);
+
+			$actorsArray = array_merge($ahActorsArray, $nonAhActorsArray);
+
+			$multiActorsArray = $actorsArray;
+			unset($multiActorsArray[0]);
+
+			$multiTeamsArray = $teamsArray;
+			unset($multiTeamsArray[0]);
+
+			// $teamsArray   = $this->arrayToSelect($teams, 'id', 'name', 'Select a team');
+			// $actorsArray = $this->arrayToSelect($finalActors, 'id', 'name', 'Select an actor');
+
+
+			$roundActors = array();
+
+			$this->setViewData('video', $video);
+			$this->setViewData('roundId', $roundId);
+			$this->setViewData('teams', $teams);
+			$this->setViewData('actors', $actors);
+			$this->setViewData('teamsArray', $teamsArray);
+			$this->setViewData('actorsArray', $actorsArray);
+			$this->setViewData('multiTeamsArray', $multiTeamsArray);
+			$this->setViewData('multiActorsArray', $multiActorsArray);
+
+			if ($roundId != null) {
+				$round = Round::find($roundId);
+
+				$roundActors = $round->actors->morph->id->toArray();
+
+				$this->setViewData('round', $round);
 			}
-			if ($teamMorphs->count() > 0) {
-				$teams->whereIn('uniqueId', $teamMorphs->morph_id->toArray());
+
+			if ($video->checkType('ROUND_BASED_GAMES')) {
+				$games = Game::orderByNameAsc()->get()->toSelectArray('Select a game');
+				$this->setViewData('games', $games);
 			}
+
+			$this->setViewData('roundActors', $roundActors);
 		}
-
-		$actors = $actors->get();
-		$teams  = $teams->get();
-
-		$teamsArray   = $this->arrayToSelect($teams, 'id', 'name', 'Select a team');
-		$actorsArray = $this->arrayToSelect($actors, 'id', 'name', 'Select an actor');
-
-		$roundActors = array();
-
-		$this->setViewData('video', $video);
-		$this->setViewData('roundId', $roundId);
-		$this->setViewData('teams', $teams);
-		$this->setViewData('actors', $actors);
-		$this->setViewData('teamsArray', $teamsArray);
-		$this->setViewData('actorsArray', $actorsArray);
-
-		if ($roundId != null) {
-			$round = Round::find($roundId);
-
-			$roundActors = $round->actors->morph->id->toArray();
-
-			$this->setViewData('round', $round);
-		}
-
-		if ($video->checkType('ROUND_BASED_GAMES')) {
-			$games = Game::orderByNameAsc()->get()->toSelectArray('Select a game');
-			$this->setViewData('games', $games);
-		}
-
-		$this->setViewData('roundActors', $roundActors);
 	}
 
 	public function postAddQuote($videoId)
@@ -125,7 +157,19 @@ class ManageController extends BaseController {
 				foreach ($input['actors'] as $actorId) {
 					$newQuoteMember                 = new Video_Quote_Actor;
 					$newQuoteMember->video_quote_id = $newQuote->id;
-					$newQuoteMember->actor_id       = $actorId;
+					$newQuoteMember->morph_id       = $actorId;
+					$newQuoteMember->morph_type     = 'Actor';
+
+					$this->save($newQuoteMember);
+				}
+			}
+
+			if (Input::has('characters') && count($input['characters']) > 0) {
+				foreach ($input['characters'] as $characterId) {
+					$newQuoteMember                 = new Video_Quote_Actor;
+					$newQuoteMember->video_quote_id = $newQuote->id;
+					$newQuoteMember->morph_id       = $characterId;
+					$newQuoteMember->morph_type     = 'Character';
 
 					$this->save($newQuoteMember);
 				}
@@ -135,12 +179,30 @@ class ManageController extends BaseController {
 			if ($this->errorCount() > 0) {
 				Ajax::addErrors($this->getErrors());
 			} else {
-				$newQuote->memberNames = implode(', ', Video_Quote::with('actors', 'actors.actor')->find($newQuote->id)->actors->actor->firstNameLink->toArray());
+				$newQuote->memberNames = implode(', ', Video_Quote::find($newQuote->id)->actors->morph->firstNameLink->toArray());
 				Ajax::setStatus('success')->addData('resource', $newQuote->toArray());
 			}
 
 			// Send the response
 			return Ajax::sendResponse();
+		}
+	}
+
+	public function postAddCharacters($videoId)
+	{
+		$this->skipView();
+
+		$input = e_array(Input::all());
+
+		if ($input != null) {
+			$videoCharacter = new Video_Character;
+			$videoCharacter->video_id = $videoId;
+			$videoCharacter->character_id = $input['character_id'];
+
+			$this->save($videoCharacter);
+
+			// Send the response
+			return $this->redirect('back', null);
 		}
 	}
 

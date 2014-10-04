@@ -34,7 +34,7 @@ class Series extends BaseModel
 	 *******************************************************************/
 	public static $relationsData = array(
 		'videos' => array('hasMany', 'Video',		'foreignKey' => 'series_id', 'orderBy' => array('date', 'desc')),
-		'types'  => array('hasMany', 'Series_Type',	'foreignKey' => 'series_id'),
+		'types'  => array('belongsToMany',	'Type',			'table' => 'series_types',  'foreignKey' => 'series_id'),
 	);
 
 	/********************************************************************

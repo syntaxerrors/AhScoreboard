@@ -34,15 +34,16 @@ class Video extends BaseModel
 	 * Relationships
 	 *******************************************************************/
 	public static $relationsData = array(
-		'series'  => array('belongsTo', 'Series',		'foreignKey' => 'series_id'),
-		'parent'  => array('belongsTo', 'Video',		'foreignKey' => 'parentId'),
-		'child'   => array('hasOne',  'Video',			'foreignKey' => 'parentId'),
-		'types'   => array('hasMany', 'Video_Type',		'foreignKey' => 'video_id'),
-		'games'   => array('hasMany', 'Video_Game',		'foreignKey' => 'video_id'),
-		'actors'  => array('hasMany', 'Video_Actor',	'foreignKey' => 'video_id'),
-		'winners' => array('hasMany', 'Video_Winner',	'foreignKey' => 'video_id'),
-		'quotes'  => array('hasMany', 'Video_Quote',	'foreignKey' => 'video_id'),
-		'rounds'  => array('hasMany', 'Round',			'foreignKey' => 'video_id', 'orderBy' => array('roundNumber', 'asc')),
+		'series'     => array('belongsTo', 'Series',		'foreignKey' => 'series_id'),
+		'parent'     => array('belongsTo', 'Video',			'foreignKey' => 'parentId'),
+		'child'      => array('hasOne',  'Video',			'foreignKey' => 'parentId'),
+		'games'      => array('hasMany', 'Video_Game',		'foreignKey' => 'video_id'),
+		'actors'     => array('hasMany', 'Video_Actor',		'foreignKey' => 'video_id'),
+		'winners'    => array('hasMany', 'Video_Winner',	'foreignKey' => 'video_id'),
+		'quotes'     => array('hasMany', 'Video_Quote',		'foreignKey' => 'video_id', 'orderBy' => array('created_at', 'desc')),
+		'rounds'     => array('hasMany', 'Round',			'foreignKey' => 'video_id', 'orderBy' => array('roundNumber', 'asc')),
+		'characters' => array('belongsToMany', 'Character',	'table' => 'video_characters'),
+		'types'      => array('belongsToMany',	'Type',			'table' => 'video_types',  'foreignKey' => 'video_id'),
 	);
 
 	/********************************************************************
@@ -53,6 +54,23 @@ class Video extends BaseModel
 		$winRounds = clone $this->rounds;
 		$wins = $winRounds->coopStat->where('winFlag', 1)->count();
 		return percent($wins, $this->rounds->count()) .'%';
+	}
+
+	public function getLinkToAttribute()
+	{
+		return HTML::link('/video/view/'. $this->id, $this->title);
+	}
+
+	public function getImageAttribute()
+	{
+		if (File::exists(public_path() .'/img/youtube/'. $this->id .'.jpg')) {
+			return '/img/youtube/'. $this->id .'.jpg';
+		}
+	}
+
+	public function getYoutubeLinkAttribute()
+	{
+		return 'http://www.youtube.com/watch?v='. $this->link;
 	}
 
 	/********************************************************************
@@ -253,11 +271,11 @@ class Video extends BaseModel
 			$newGame->save();
 
 			// Make sure the video knows about the game
-			$videoGames = $this->video->games->game_id->toArray();
+			$videoGames = $this->games->game_id->toArray();
 
 			if (!in_array($input['game_id'], $videoGames)) {
 				$newVideoGame           = new Video_Game;
-				$newVideoGame->video_id = $this->video_id;
+				$newVideoGame->video_id = $this->id;
 				$newVideoGame->game_id  = $input['game_id'];
 
 				$newVideoGame->save();

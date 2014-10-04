@@ -34,8 +34,16 @@
 									{{ implode('<br />', $video->actors->morph->link->toArray()) }}
 								</div>
 								<div class="col-md-3">
-									<h4>Winners</h4>
-									{{ implode('<br />', $video->winners->morph->link->toArray()) }}
+									@if ($video->checkType('CO_OP'))
+										<h4>Co-Op success per round</h4>
+										{{ implode('<br />', $video->rounds->coopStat->display->toArray()) }}
+									@elseif ($video->checkType('WAVES'))
+										<h4>Highest wave per round</h4>
+										{{ implode('<br />', $video->rounds->wave->highestWave->toArray()) }}
+									@else
+										<h4>Winners</h4>
+										{{ implode('<br />', $video->winners->morph->link->toArray()) }}
+									@endif
 								</div>
 								<div class="col-md-3">
 									<h4>Games</h4>

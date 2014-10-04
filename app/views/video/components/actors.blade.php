@@ -9,7 +9,59 @@
 			<div id="collapseCompetitors" class="panel-body accordion-body">
 				<div class="row">
 					<div class="col-md-6">
-						@foreach ($actors as $actor)
+						<div class="row">
+							<div class="col-md-6">
+								<strong class="text-primary">Achievement Hunter</strong>
+								@foreach ($ahActors as $actor)
+									<?php
+										$checked = null;
+										if (isset($video) && $video->actors->count() > 0) {
+											$actorCompetitors = $video->actors->filter(function ($actor) {
+												if ($actor->morph_type == 'Actor') {
+													return $actor;
+												}
+											});
+											if ($actorCompetitors->morph->contains($actor->id)) {
+												$checked = ' checked="checked"';
+											}
+										}
+									?>
+									<div class="checkbox">
+										<label>
+											<input type="checkbox" name="actor[Actor::{{ $actor->id }}]" id="{{ $actor->name }}" {{ $checked }} />
+											{{ $actor->name }}
+										</label>
+									</div>
+								@endforeach
+							</div>
+							<div class="col-md-6">
+								<strong class="text-primary">Podcast/Patch Crew</strong>
+								@foreach ($podcastActors as $actor)
+									<?php
+										$checked = null;
+										if (isset($video) && $video->actors->count() > 0) {
+											$actorCompetitors = $video->actors->filter(function ($actor) {
+												if ($actor->morph_type == 'Actor') {
+													return $actor;
+												}
+											});
+											if ($actorCompetitors->morph->contains($actor->id)) {
+												$checked = ' checked="checked"';
+											}
+										}
+									?>
+									<div class="checkbox">
+										<label>
+											<input type="checkbox" name="actor[Actor::{{ $actor->id }}]" id="{{ $actor->name }}" {{ $checked }} />
+											{{ $actor->name }}
+										</label>
+									</div>
+								@endforeach
+							</div>
+						</div>
+						<hr />
+						<strong class="text-primary">News Reporters</strong>
+						@foreach ($newsActors as $actor)
 							<?php
 								$checked = null;
 								if (isset($video) && $video->actors->count() > 0) {
@@ -30,6 +82,57 @@
 								</label>
 							</div>
 						@endforeach
+						<hr />
+						<div class="row">
+							<div class="col-md-6">
+								<strong class="text-primary">General Actors</strong>
+								@foreach ($actors as $actor)
+									<?php
+										$checked = null;
+										if (isset($video) && $video->actors->count() > 0) {
+											$actorCompetitors = $video->actors->filter(function ($actor) {
+												if ($actor->morph_type == 'Actor') {
+													return $actor;
+												}
+											});
+											if ($actorCompetitors->morph->contains($actor->id)) {
+												$checked = ' checked="checked"';
+											}
+										}
+									?>
+									<div class="checkbox">
+										<label>
+											<input type="checkbox" name="actor[Actor::{{ $actor->id }}]" id="{{ $actor->name }}" {{ $checked }} />
+											{{ $actor->name }}
+										</label>
+									</div>
+								@endforeach
+							</div>
+							<div class="col-md-6">
+								<strong class="text-primary">Voice Actors</strong>
+								@foreach ($voiceActors as $actor)
+									<?php
+										$checked = null;
+										if (isset($video) && $video->actors->count() > 0) {
+											$actorCompetitors = $video->actors->filter(function ($actor) {
+												if ($actor->morph_type == 'Actor') {
+													return $actor;
+												}
+											});
+											if ($actorCompetitors->morph->contains($actor->id)) {
+												$checked = ' checked="checked"';
+											}
+										}
+									?>
+									<div class="checkbox">
+										<label>
+											<input type="checkbox" name="actor[Actor::{{ $actor->id }}]" id="{{ $actor->name }}" {{ $checked }} />
+											{{ $actor->name }}
+										</label>
+									</div>
+								@endforeach
+							</div>
+						</div>
 					</div>
 					<div class="col-md-6">
 						@foreach ($teams as $team)

@@ -28,7 +28,7 @@ class Game extends BaseModel
 	public static $relationsData = array(
 		'videos' => array('hasMany', 'Video_Game',		'foreignKey' => 'game_id'),
 		'rounds' => array('hasMany', 'Round_Game',		'foreignKey' => 'game_id'),
-		'types'  => array('hasMany', 'Game_Type',		'foreignKey' => 'game_id'),
+		'types'  => array('belongsToMany',	'Type',			'table' => 'game_types',  'foreignKey' => 'game_id'),
 	);
 
 	/********************************************************************

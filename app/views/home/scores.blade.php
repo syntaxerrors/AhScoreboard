@@ -3,11 +3,17 @@
 	<h3 id="myModalLabel">{{ $video->title }}</h3>
 </div>
 <div class="modal-body">
-	@if ($video->checkType('OVERALL_WINNER') || (!$video->checkType('ROUND_BASED_GAMES') && $video->rounds->count() == 1))
+	@if ($video->checkType('OVERALL_WINNER') || (!$video->checkType('WAVES') && !$video->checkType('CO_OP') && !$video->checkType('ROUND_BASED_GAMES') && $video->rounds->count() == 1))
 		<h3>Winner: {{ $video->winners->first()->morph->name }}</h3>
 	@endif
 	<table>
 		<tbody>
+			@if ($video->type != null)
+				<tr>
+					<td>Type:</td>
+					<td>{{ $video->type }}</td>
+				</tr>
+			@endif
 			<tr>
 				<td>Actors:</td>
 				<td>{{ implode(', ', $video->actors->morph->firstNameLink->toArray()) }}</td>
@@ -18,7 +24,7 @@
 			</tr>
 		</tbody>
 	</table>
-	@if ($video->rounds->count() > 0 && ($video->checkType('ROUND_BASED_GAMES') || $video->rounds->count() != 1))
+	@if ($video->rounds->count() > 0 && ($video->checkType('WAVES') || $video->checkType('CO_OP') || $video->checkType('ROUND_BASED_GAMES') || $video->rounds->count() != 1))
 		<div class="well">
 			<table class="table table-condensed">
 				<caption>Round Details</caption>
@@ -44,7 +50,6 @@
 					@foreach ($video->rounds as $videoRound)
 						<?php
 							$actors = implode('<br />', $videoRound->actors->morph->name->toArray());
-							$winners     = implode(', ', $videoRound->winners->morph->link->toArray());
 						?>
 						<tr>
 							<td>Round {{ $videoRound->roundNumber }}</td>
@@ -64,7 +69,7 @@
 								@elseif ($video->checkType('CO_OP'))
 									{{ $videoRound->coopStat->display }}
 								@else
-									{{ $winners }}
+									{{ implode(', ', $videoRound->winners->morph->link->toArray()) }}
 								@endif
 							</td>
 						</tr>

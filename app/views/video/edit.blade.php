@@ -21,7 +21,7 @@
 					{{ bForm::text('title', $video->title, array('id' => 'title', 'required' => 'required'), 'Title') }}
 					{{ bForm::text('link', $video->link, array('id' => 'link', 'required' => 'required'), 'YouTube Link') }}
 					{{ bForm::date('date', $video->date, array(),  'Date') }}
-					{{ bForm::select('types[]', $types, $video->types->type_id->toArray(), array('multiple'), 'Types') }}
+					{{ bForm::select('types[]', $types, $video->types->id->toArray(), array('multiple'), 'Types') }}
 					<div class="form-group">
 						<div class="col-md-offset-2 col-md-10">
 							{{ Form::submit('Submit', array('class' => 'btn btn-sm btn-primary')) }}

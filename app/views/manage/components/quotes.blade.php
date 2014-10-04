@@ -24,9 +24,15 @@
 						<div class="col-md-8">
 							{{ bForm::textarea('quotes', null, array('placeholder' => 'Quotes'), 'Quotes') }}
 						</div>
-						<div class="col-md-4">
-							{{ bForm::select('actors[]', $video->actors->where('morph_type', 'Actor')->morph->toSelectArray(false), null, array('multiple', 'style' => 'height: 190px;'), 'Actors') }}
-						</div>
+						@if ($video->series->checkType('CHARACTERS'))
+							<div class="col-md-4">
+								{{ bForm::select('characters[]', $video->characters->toSelectArray(false), null, array('multiple', 'style' => 'height: 190px;'), 'Actors') }}
+							</div>
+						@else
+							<div class="col-md-4">
+								{{ bForm::select('actors[]', $video->actors->where('morph_type', 'Actor')->morph->toSelectArray(false), null, array('multiple', 'style' => 'height: 190px;'), 'Actors') }}
+							</div>
+						@endif
 					</div>
 					<div class="row">
 						<div class="col-md-12">
@@ -61,7 +67,7 @@
 								<td>{{ $quote->linkOnly }}</td>
 								<td>{{ $quote->timeStart }}</td>
 								<td>{{ $quote->timeEnd }}</td>
-								<td>{{ implode(', ', $quote->actors->actor->firstNameLink->toArray()) }}</td>
+								<td>{{ implode(', ', $quote->actors->morph->firstNameLink->toArray()) }}</td>
 							</tr>
 						@endforeach
 					@else

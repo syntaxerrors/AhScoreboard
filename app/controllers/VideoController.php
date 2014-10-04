@@ -18,35 +18,57 @@ class VideoController extends BaseController {
 		$this->setViewData('quote', $quote);
 	}
 
+	public function getViewStreak($seriesKeyName, $actorId)
+	{
+		$actor  = Actor::find($actorId);
+		$series = Series::where('keyName', $seriesKeyName)->first();
+
+		$this->setViewData('actor', $actor);
+		$this->setViewData('series', $series);
+	}
+
+	public function getViewStreakType($typeKeyName, $actorId)
+	{
+		$actor  = Actor::find($actorId);
+		$type   = Type::where('keyName', $typeKeyName)->first();
+
+		$this->setViewData('actor', $actor);
+		$this->setViewData('type', $type);
+	}
+
 	public function getRss()
 	{
 		$developer = $this->hasPermission('DEVELOPER');
 
-		$ahUrl = 'http://gdata.youtube.com/feeds/api/videos?orderby=published&max-results=50&author=LetsPlay';
-		$rtUrl = 'http://gdata.youtube.com/feeds/api/videos?orderby=published&max-results=50&author=RoosterTeeth';
-		// ppd($rtUrl);
-		// $urls = array(
-		// 	// 'http://pipes.yahoo.com/pipes/pipe.run?_id=d0faef82517b29ea6472e4b58df7a923&_render=rss',
-		// 	'http://gdata.youtube.com/feeds/api/videos?q='. urlencode('-"Behind the scenes"-"News:"-"Trials Files"') .'&orderby=published&max-results=50&author=RoosterTeeth',
-		// 	'http://gdata.youtube.com/feeds/api/videos?orderby=published&max-results=10&author=LetsPlay',
-		// );
+		$ahUrl = 'http://gdata.youtube.com/feeds/api/videos?orderby=published&max-results=20&author=LetsPlay';
+		$rtUrl = 'http://gdata.youtube.com/feeds/api/videos?orderby=published&max-results=20&author=RoosterTeeth';
+		$tkUrl = 'http://gdata.youtube.com/feeds/api/videos?orderby=published&max-results=20&author=know';
+
 		$ahFeed = new SimplePie();
 		$ahFeed->set_feed_url($ahUrl);
 		$ahFeed->set_cache_location(storage_path().'/cache');
-		$ahFeed->set_cache_duration(100);
+		$ahFeed->set_cache_duration(30);
 		$ahFeed->set_item_limit(50);
 		$ahFeed->init();
 
 		$rtFeed = new SimplePie();
 		$rtFeed->set_feed_url($rtUrl);
 		$rtFeed->set_cache_location(storage_path().'/cache');
-		$rtFeed->set_cache_duration(100);
+		$rtFeed->set_cache_duration(30);
 		$rtFeed->set_item_limit(50);
 		$rtFeed->init();
+
+		$tkFeed = new SimplePie();
+		$tkFeed->set_feed_url($tkUrl);
+		$tkFeed->set_cache_location(storage_path().'/cache');
+		$tkFeed->set_cache_duration(30);
+		$tkFeed->set_item_limit(50);
+		$tkFeed->init();
 
 		$this->setViewData('developer', $developer);
 		$this->setViewData('ahFeed', $ahFeed);
 		$this->setViewData('rtFeed', $rtFeed);
+		$this->setViewData('tkFeed', $tkFeed);
 	}
 
 	public function getAdd($title = null, $link = null, $date = null)
@@ -76,7 +98,11 @@ class VideoController extends BaseController {
 			$gameId   = (isset($game->id[0]) ? $game->id[0] : 0);
 
 			preg_match('/[0-9]+/', $title, $matches);
-			$seriesNumber = $matches[0];
+			if (isset($matches[0])) {
+				$seriesNumber = $matches[0];
+			} else {
+				$seriesNumber = 0;
+			}
 		} else {
 			$seriesId     = 0;
 			$gameId       = 0;
@@ -90,13 +116,42 @@ class VideoController extends BaseController {
 		$teams  = Team::orderByNameAsc()->get();
 		$actors = Actor::orderByNameAsc()->get();
 
+		$ahActors = clone $actors;
+		$ahActors = $ahActors->filter(function ($actor) {
+			if ($actor->checkType('AH_ACTOR')) return true;
+		});
+
+		$podcastActors = clone $actors;
+		$podcastActors = $podcastActors->filter(function ($actor) {
+			if ($actor->checkType('PODCAST_CREW')) return true;
+		});
+
+		$newsActors = clone $actors;
+		$newsActors = $newsActors->filter(function ($actor) {
+			if ($actor->checkType('NEWS_REPORTER')) return true;
+		});
+
+		$voiceActors = clone $actors;
+		$voiceActors = $voiceActors->filter(function ($actor) {
+			if ($actor->checkType('VOICE_ONLY')) return true;
+		});
+
+		$actors = $actors->filter(function ($actor) {
+			if ($actor->checkType('VOICE_ONLY')) return false;
+			if (!$actor->checkType(array('AH_ACTOR', 'NEWS_REPORTER', 'PODCAST_CREW', 'VOICE_ONLY'))) return true;
+		});
+
 		$this->setViewData('types', $types);
 		$this->setViewData('series', $series);
 		$this->setViewData('seriesNumber', $seriesNumber);
 		$this->setViewData('games', $games);
 		$this->setViewData('videos', $videos);
 		$this->setViewData('teams', $teams);
+		$this->setViewData('ahActors', $ahActors);
+		$this->setViewData('podcastActors', $podcastActors);
+		$this->setViewData('newsActors', $newsActors);
 		$this->setViewData('actors', $actors);
+		$this->setViewData('voiceActors', $voiceActors);
 		$this->setViewData('seriesId', $seriesId);
 		$this->setViewData('gameId', $gameId);
 		$this->setViewData('link', $link);
@@ -138,7 +193,7 @@ class VideoController extends BaseController {
 				$this->save($videoGame);
 			}
 
-			if (!$video->checkType('ROUND_BASED_ACTORS')) {
+			if (!$video->checkType('ROUND_BASED_ACTORS') && !$video->series->checkType('CHARACTERS')) {
 				foreach ($input['actor'] as $actor => $value) {
 					$bits = explode('::', $actor);
 
@@ -177,13 +232,42 @@ class VideoController extends BaseController {
 		$teams  = Team::orderByNameAsc()->get();
 		$actors = Actor::orderByNameAsc()->get();
 
+		$ahActors = clone $actors;
+		$ahActors = $ahActors->filter(function ($actor) {
+			if ($actor->checkType('AH_ACTOR')) return true;
+		});
+
+		$podcastActors = clone $actors;
+		$podcastActors = $podcastActors->filter(function ($actor) {
+			if ($actor->checkType('PODCAST_CREW')) return true;
+		});
+
+		$newsActors = clone $actors;
+		$newsActors = $newsActors->filter(function ($actor) {
+			if ($actor->checkType('NEWS_REPORTER')) return true;
+		});
+
+		$voiceActors = clone $actors;
+		$voiceActors = $voiceActors->filter(function ($actor) {
+			if ($actor->checkType('VOICE_ONLY')) return true;
+		});
+
+		$actors = $actors->filter(function ($actor) {
+			if ($actor->checkType('VOICE_ONLY')) return false;
+			if (!$actor->checkType(array('AH_ACTOR', 'NEWS_REPORTER', 'PODCAST_CREW', 'VOICE_ONLY'))) return true;
+		});
+
 		$this->setViewData('types', $types);
 		$this->setViewData('video', $video);
 		$this->setViewData('series', $series);
 		$this->setViewData('games', $games);
 		$this->setViewData('videos', $videos);
 		$this->setViewData('teams', $teams);
+		$this->setViewData('ahActors', $ahActors);
+		$this->setViewData('podcastActors', $podcastActors);
+		$this->setViewData('newsActors', $newsActors);
 		$this->setViewData('actors', $actors);
+		$this->setViewData('voiceActors', $voiceActors);
 	}
 
 	public function postEdit($videoId)
@@ -203,10 +287,8 @@ class VideoController extends BaseController {
 
 			$this->checkErrorsSave($video);
 
+			$video->types()->detach();
 			if (Input::has('types')) {
-				foreach ($video->types as $type) {
-					$type->delete();
-				}
 				foreach ($input['types'] as $typeId) {
 					$newType           = new Video_Type;
 					$newType->video_id = $video->id;
@@ -225,30 +307,39 @@ class VideoController extends BaseController {
 
 				$this->save($videoGame);
 			}
-			if (isset($input['actor'])) {
-				foreach ($video->actors as $actor) {
-					$actor->delete();
-				}
-				foreach ($input['actor'] as $actor => $value) {
-					$bits = explode('::', $actor);
+			if (!$video->checkType('ROUND_BASED_ACTORS') && !$video->series->checkType('CHARACTERS')) {
+				if (isset($input['actor'])) {
+					foreach ($video->actors as $actor) {
+						$actor->delete();
+					}
+					foreach ($input['actor'] as $actor => $value) {
+						$bits = explode('::', $actor);
 
-					$videoActor             = new Video_Actor;
-					$videoActor->video_id   = $video->id;
-					$videoActor->morph_id   = $bits[1];
-					$videoActor->morph_type = $bits[0];
+						$videoActor             = new Video_Actor;
+						$videoActor->video_id   = $video->id;
+						$videoActor->morph_id   = $bits[1];
+						$videoActor->morph_type = $bits[0];
 
-					$this->save($videoActor);
+						$this->save($videoActor);
+					}
 				}
 			}
 
 			if (isset($input['details'])) {
-				$link = ($video->checkType('CO_OP') ? 'coopstats' : 'winners');
-
-				return $this->redirect('/manage/'. $link .'/'. $video->id, $video->title .' has been submitted.');
+				return $this->redirect('/manage/details/'. $video->id, $video->title .' has been submitted.');
 			} else {
 				return $this->redirect('/manage', $video->title .' has been submitted.');
 			}
 		}
+	}
+
+	public function getDelete($videoId)
+	{
+		$this->skipView();
+
+		Video::find($videoId)->delete();
+
+		return $this->redirect('back', 'Video deleted.');
 	}
 
 	public function getFavorite($id, $type)

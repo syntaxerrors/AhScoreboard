@@ -2,10 +2,22 @@
 	<div class="col-md-offset-1 col-md-10">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				Videos
+				Videos: Found 
+				@if ($paginator == true)
+					{{ $videos->getTotal() }}
+				@else
+					{{ $videos->count() }}
+				@endif
 				<div class="panel-btn">
 					{{ HTML::linkIcon('/video/add', 'fa fa-plus-circle') }}
 				</div>
+				@if ($paginator == true)
+					<div class="pull-right">
+						<small>
+							Showing results {{ $videos->getFrom() }} - {{ $videos->getTo() }}
+						</small>
+					</div>
+				@endif
 			</div>
 			<table class="table table-hover table-condensed table-striped">
 				<thead>
@@ -35,17 +47,7 @@
 						?>
 						<tr>
 							<td>{{ stripslashes($video->title) }}</td>
-							@if ($video->series->checkType('NON_GAME'))
-								<td><span class="label label-danger">Non Game</span></td>
-							@elseif ($video->checkType('WAVES'))
-								<td><span class="label label-success">Waves</span></td>
-							@elseif ($video->checkType('CO_OP'))
-								<td><span class="label label-info">Co-op</span></td>
-							@elseif ($video->checkType('FOR_THE_TOWER'))
-								<td><span class="label label-warning">Tower of Pimps</span></td>
-							@else
-								<td>&nbsp;</td>
-							@endif
+							<td>{{ $video->typeLabel }}</td>
 							<td>{{ $video->seriesNumber }}</td>
 							<td class="text-center">
 								@if ($video->actors->count() > 0)

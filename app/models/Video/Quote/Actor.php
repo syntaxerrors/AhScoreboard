@@ -17,15 +17,16 @@ class Video_Quote_Actor extends BaseModel
 	 *******************************************************************/
 	public static $rules = array(
 		'video_quote_id' => 'required|exists:video_quotes,uniqueId',
-		'actor_id'       => 'required|exists:actors,uniqueId',
+		'morph_id'       => 'required',
+		'morph_type'     => 'required',
 	);
 
 	/********************************************************************
 	 * Relationships
 	 *******************************************************************/
 	public static $relationsData = array(
-		'quote'  => array('belongsTo',	'Video_Quote',	'foreignKey' => 'video_quote_id'),
-		'actor' => array('belongsTo',	'Actor',		'foreignKey' => 'actor_id'),
+		'quote' => array('belongsTo',	'Video_Quote',	'foreignKey' => 'video_quote_id'),
+		'morph' => array('morphTo'),
 	);
 
 	/********************************************************************

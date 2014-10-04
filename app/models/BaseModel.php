@@ -19,7 +19,7 @@ class BaseModel extends Core_BaseModel {
 		$matchedType = 0;
 
 		if ($this->types && $this->types->count() > 0) {
-			$objectTypes = $this->types->type->keyName->toArray();
+			$objectTypes = $this->types->keyName->toArray();
 
 			foreach ($types as $type) {
 				if (in_array($type, $objectTypes)) {

@@ -110,7 +110,8 @@ return array(
 	|
 	*/
 	'nonCoreAliases' => array(
-		'User'
+		'User',
+		'Menu'
 	),
 
 );

@@ -9,6 +9,8 @@
 				@include('manage.components.coop')
 			@elseif ($video->checkType('WAVES'))
 				@include('manage.components.waves')
+			@elseif ($video->series->checkType('CHARACTERS'))
+				@include('manage.components.characters')
 			@else
 				@include('manage.components.winners')
 			@endif
@@ -76,6 +78,8 @@
 				'</tr>';
 
 				$('#existingQuotes tbody').append(row);
+
+				$('#quoteForm')[0].reset();
 			}
 		);
 	</script>

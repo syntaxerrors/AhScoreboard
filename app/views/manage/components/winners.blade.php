@@ -65,10 +65,10 @@
 					@if ($video->checkType('ROUND_BASED_ACTORS'))
 						<div class="row">
 							<div class="col-md-5">
-								{{ bForm::select('actors[actor][]', Actor::orderByNameAsc()->get()->toSelectArray(false), $roundActors, array('multiple', 'style' => 'height: 200px;'), 'Actors') }}
+								{{ bForm::select('actors[actor][]', $multiActorsArray, $roundActors, array('multiple', 'style' => 'height: 200px;'), 'Actors') }}
 							</div>
 							<div class="col-md-6">
-								{{ bForm::select('actors[team][]', Team::orderByNameAsc()->get()->toSelectArray(false), $roundActors, array('multiple', 'style' => 'height: 200px;'), 'Teams') }}
+								{{ bForm::select('actors[team][]', $multiTeamsArray, $roundActors, array('multiple', 'style' => 'height: 200px;'), 'Teams') }}
 							</div>
 						</div>
 					@endif

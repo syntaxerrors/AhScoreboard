@@ -11,6 +11,7 @@ Route::get('logout', function()
 Route::controller('api' ,	'Core_ApiVersionOneController');
 Route::controller('video',	'VideoController');
 Route::controller('quotes',	'QuoteController');
+Route::controller('actors',	'ActorController');
 
 // Secure routes
 /********************************************************************

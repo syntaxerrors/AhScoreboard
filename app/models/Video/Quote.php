@@ -37,7 +37,11 @@ class Video_Quote extends BaseModel
 	public function getYoutubeTimestampAttribute()
 	{
 		$bits = explode(':', $this->timeStart);
-		$seconds = ($bits[0] * 60) + $bits[1];
+		if (count($bits) == 3) {
+			$seconds = ($bits[0] * 60 * 60) + ($bits[1] * 60) + $bits[2];
+		} else {
+			$seconds = ($bits[0] * 60) + $bits[1];
+		}
 
 		return $seconds;
 	}

@@ -15,7 +15,8 @@
 		"syntax/core": "1.0.0",
 		"anlutro/curl": "dev-master",
 		"doctrine/dbal": "*",
-		"simplepie/simplepie": "dev-master"
+		"simplepie/simplepie": "dev-master",
+		"vespakoen/menu": "dev-master"
 	},
 	"autoload": {
 		"classmap": [

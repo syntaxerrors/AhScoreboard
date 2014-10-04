@@ -15,7 +15,7 @@ return array(
 	|            "memcached", "redis", "array"
 	|
 	*/
-	'driver' => 'database',
+	'driver' => 'native',
 
 	/*
 	|--------------------------------------------------------------------------

@@ -98,6 +98,10 @@ class Round extends BaseModel
 					$newRoundWinner->save();
 				}
 			}
+
+			if (!$this->video->checkType('OVERALL_WINNER')) {
+				$this->video->addOverallWinners($input);
+			}
 		}
 
 		// Handle the game

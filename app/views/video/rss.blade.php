@@ -1,13 +1,39 @@
 <div class="row">
-	<div class="col-md-6">
-		@foreach ($ahFeed->get_items() as $item)
-			@include('video.components.rssfeeditem')
-		@endforeach
+	<div class="col-md-4">
+		<div class="panel panel-default">
+			<div class="panel-heading">Let's Play</div>
+			<table class="table table-condensed table-hover">
+				<tbody>
+					@foreach ($ahFeed->get_items() as $item)
+						@include('video.components.rssfeeditem')
+					@endforeach
+				</tbody>
+			</table>
+		</div>
 	</div>
-	<div class="col-md-6">
-		@foreach ($rtFeed->get_items() as $item)
-			@include('video.components.rssfeeditem')
-		@endforeach
+	<div class="col-md-4">
+		<div class="panel panel-default">
+			<div class="panel-heading">RoosterTeeth</div>
+			<table class="table table-condensed table-hover">
+				<tbody>
+					@foreach ($rtFeed->get_items() as $item)
+						@include('video.components.rssfeeditem')
+					@endforeach
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="col-md-4">
+		<div class="panel panel-default">
+			<div class="panel-heading">The Know</div>
+			<table class="table table-condensed table-hover">
+				<tbody>
+					@foreach ($tkFeed->get_items() as $item)
+						@include('video.components.rssfeeditem')
+					@endforeach
+				</tbody>
+			</table>
+		</div>
 	</div>
 </div>
 <div id="scoresModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myScoresModalLabel" aria-hidden="true">

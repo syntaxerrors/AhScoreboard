@@ -1,3 +1,9 @@
+<!-- <span class="fa-stack fa-3x">
+  <i class="fa fa-circle fa-stack-2x" style="color: #000;"></i>
+  <i class="fa fa-circle-o fa-stack-2x text-primary"></i>
+  <i class="fa fa-star fa-stack-1x text-primary"></i>
+  <i class="fa fa-filter fa-flip-vertical fa-stack-1x" style="color: #000;"></i>
+</span> -->
 <div class="row" id="ajaxContent">
 	<div class="col-md-2">
 		<div class="panel panel-default">
@@ -11,17 +17,22 @@
 					</li>
 					<li>
 						<div class="list-glow-group-item">
-							<div class="col-md-12">{{ HTML::link('http://www.youtube.com/user/RoosterTeeth', 'RoosterTeeth @ YouTube', array('target' => '_blank')) }}</div>
-						</div>
-					</li>
-					<li>
-						<div class="list-glow-group-item">
 							<div class="col-md-12">{{ HTML::link('http://achievementhunter.com/', 'AchievementHunter.com', array('target' => '_blank')) }}</div>
 						</div>
 					</li>
 					<li>
 						<div class="list-glow-group-item">
+							<div class="col-md-12">{{ HTML::link('http://www.youtube.com/user/RoosterTeeth', 'RoosterTeeth @ YouTube', array('target' => '_blank')) }}</div>
+						</div>
+					</li>
+					<li>
+						<div class="list-glow-group-item">
 							<div class="col-md-12">{{ HTML::link('http://www.youtube.com/user/LetsPlay', 'Lets Play @ YouTube', array('target' => '_blank')) }}</div>
+						</div>
+					</li>
+					<li>
+						<div class="list-glow-group-item">
+							<div class="col-md-12">{{ HTML::link('http://www.youtube.com/user/know', 'The Know @ YouTube', array('target' => '_blank')) }}</div>
 						</div>
 					</li>
 				</ul>
