@@ -39,8 +39,10 @@ class Video_Quote extends BaseModel
 		$bits = explode(':', $this->timeStart);
 		if (count($bits) == 3) {
 			$seconds = ($bits[0] * 60 * 60) + ($bits[1] * 60) + $bits[2];
-		} else {
+		} else if (count($bits) == 2) {
 			$seconds = ($bits[0] * 60) + $bits[1];
+		} else {
+			$seconds = $bits[0];
 		}
 
 		return $seconds;
